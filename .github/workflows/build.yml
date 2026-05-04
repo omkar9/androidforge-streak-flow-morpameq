@@ -33,11 +33,11 @@ jobs:
           fi
           chmod +x gradlew
 
-      - name: Force overwrite libs.versions.toml (no duplicates)
+      - name: Force overwrite libs.versions.toml
         run: |
           mkdir -p gradle
-          cat > gradle/libs.versions.toml << 'TOML'
-[versions]
+          python3 - << 'PYEOF'
+toml = """[versions]
 agp = "8.3.2"
 kotlin = "1.9.23"
 coreKtx = "1.13.1"
@@ -91,8 +91,11 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-TOML
-          echo "libs.versions.toml written (no duplicates)"
+"""
+with open("gradle/libs.versions.toml", "w") as f:
+    f.write(toml)
+print("libs.versions.toml written successfully")
+PYEOF
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace --no-daemon
